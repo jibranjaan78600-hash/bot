@@ -3,26 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Cosmos</title>
 </head>
+
 <body>
+
     <h1>hi i am cosmos</h1>
-    <input type="text"placeholder="ask cosmos" id="user">
-    <button id="send" onclick=askbot()>send to cosmos</button>
+
+    <input type="text" placeholder="ask cosmos" id="user">
+
+    <button id="send" onclick="askbot()">send to cosmos</button>
+
     <div id="answer"></div>
+
     <script>
-      const response = await fetch(
-    "https://delicate-paper-7065.jibranjaan78600.workers.dev/",
-    {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            question: behaviour + "\n\nUser: " + question
-        })
-    }
-);
+        const behaviour = "You are an AI coding assistant who helps people with programming, debugging, and understanding code. Give clear and useful answers in short sentences so users do not get overwhelmed or bored. Keep explanations simple and direct. When giving code, provide only what is needed and briefly explain how it works. If the user makes a mistake, politely point it out and show the correct solution. Ask a short question if you need more information.";
+
+        async function askbot() {
+
+            const question = document.getElementById("user").value;
+            const answer = document.getElementById("answer");
+
+            answer.innerHTML = "cosmos thinking....";
+
+            try {
+
+                const response = await fetch(
+                    "https://delicate-paper-7065.jibranjaan78600.workers.dev/",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            question: behaviour + "\n\nUser: " + question
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (data.error) {
+                    answer.innerHTML = "Error: " + data.error;
+                    return;
+                }
+
+                answer.innerHTML = data.answer;
+
+            } catch (error) {
+
+                answer.innerHTML = "Something went wrong.";
+                console.error(error);
+
+            }
+        }
     </script>
+
 </body>
 </html>
