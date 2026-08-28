@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cosmos</title>
+    <style>
+            body {
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: #0b1020;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+}
+    </style>
 </head>
 
 <body>
@@ -17,14 +31,22 @@
     <div id="answer"></div>
 
     <script>
-        const behaviour = "You are an AI (you are informal and funny so people dont get bored use emojis and stuff as well to look colorful) coding assistant who helps people with programming, debugging, and understanding code. Give clear and useful answers in short sentences so users do not get overwhelmed or bored. Keep explanations simple and direct. When giving code, provide only what is needed and briefly explain how it works. If the user makes a mistake, politely point it out and show the correct solution. Ask a short question if you need more information.";
+
+        const behaviour =
+            "You are an AI coding assistant who helps people with programming, debugging, and understanding code. Give clear and useful answers in short sentences so users do not get overwhelmed or bored. Keep explanations simple and direct. When giving code, provide only what is needed and briefly explain how it works. If the user makes a mistake, politely point it out and show the correct solution. Ask a short question if you need more information.";
 
         async function askbot() {
 
             const question = document.getElementById("user").value;
+
             const answer = document.getElementById("answer");
 
-            answer.innerHTML = "cosmos thinking....";
+            if (!question.trim()) {
+                answer.innerHTML = "Please ask me something!";
+                return;
+            }
+
+            answer.innerHTML = "Cosmos thinking....";
 
             try {
 
@@ -38,15 +60,28 @@
                         },
 
                         body: JSON.stringify({
-                            question: behaviour + "\n\nUser: " + question
+                            question:
+                                behaviour +
+                                "\n\nUser: " +
+                                question
                         })
                     }
                 );
 
                 const data = await response.json();
 
-                if (data.error) {
-                    answer.innerHTML = "Error: " + data.error;
+                console.log("Worker response:", data);
+
+                if (!response.ok) {
+                    answer.innerHTML =
+                        "Error: " +
+                        (data.error || "Unknown error");
+                    return;
+                }
+
+                if (!data.answer) {
+                    answer.innerHTML =
+                        "Cosmos didn't return an answer.";
                     return;
                 }
 
@@ -54,11 +89,14 @@
 
             } catch (error) {
 
-                answer.innerHTML = "Something went wrong.";
                 console.error(error);
 
+                answer.innerHTML =
+                    "Connection error: " +
+                    error.message;
             }
         }
+
     </script>
 
 </body>
