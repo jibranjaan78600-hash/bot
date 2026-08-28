@@ -1,136 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cosmos</title>
+
     <style>
-       body {
-    margin: 0;
-    min-height: 100vh;
 
-    background-color: #0b1020;
-    color: white;
+        body {
+            margin: 0;
+            min-height: 100vh;
 
-    font-family: Arial, sans-serif;
+            background-color: #0b1020;
+            color: white;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+            font-family: Arial, sans-serif;
 
-
-/* BIG COSMOS BOX */
-
-.div {
-    width: 850px;
-    height: 600px;
-
-    padding: 25px;
-
-    background-color: #151c33;
-
-    border: 1px solid #2d3a63;
-    border-radius: 20px;
-
-    box-sizing: border-box;
-
-    display: flex;
-    flex-direction: column;
-}
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
 
-/* HEADING */
+        /* BIG COSMOS BOX */
 
-.div h1 {
-    margin: 0;
+        .div {
+            width: 850px;
+            height: 600px;
 
-    font-size: 48px;
-}
+            padding: 25px;
 
+            background-color: #151c33;
 
-/* ANSWER */
+            border: 1px solid #2d3a63;
+            border-radius: 20px;
 
-#answer {
-    margin-top: 25px;
+            box-sizing: border-box;
 
-    font-size: 18px;
-}
-
-
-/* INPUT + BUTTON AREA */
-
-.div2 {
-    width: 100%;
-
-    margin-top: auto;
-
-    display: flex;
-    gap: 12px;
-}
+            display: flex;
+            flex-direction: column;
+        }
 
 
-/* INPUT */
+        /* HEADING */
 
-.div2 input {
-    flex: 1;
+        .div h1 {
+            margin: 0;
 
-    height: 60px;
+            text-align: center;
 
-    padding: 15px;
-
-    font-size: 20px;
-
-    box-sizing: border-box;
-
-    border: none;
-    border-radius: 12px;
-}
+            font-size: 48px;
+        }
 
 
-/* BUTTON */
+        /* ANSWER */
 
-    .div2 button {
-        width: 120px;
-        height: 60px;
-    
-        font-size: 18px;
-    
-        border: none;
-        border-radius: 12px;
-    
-        cursor: pointer;
-    }
+        #answer {
+            margin-top: 25px;
+
+            font-size: 18px;
+        }
+
+
+        /* BOTTOM INPUT AREA */
+
+        .bottom {
+            margin-top: auto;
+
+            width: 100%;
+
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+
+            gap: 10px;
+        }
+
+
+        /* INPUT */
+
+        .bottom input {
+            width: 600px;
+            height: 60px;
+
+            padding: 15px;
+
+            font-size: 20px;
+
+            box-sizing: border-box;
+
+            border: none;
+            border-radius: 12px;
+        }
+
+
+        /* SEND BUTTON */
+
+        .bottom button {
+            width: 120px;
+            height: 60px;
+
+            font-size: 18px;
+
+            border: none;
+            border-radius: 12px;
+
+            cursor: pointer;
+        }
+
     </style>
 </head>
 
-<body>
-    <div class="div">
-    <h1>hi i am cosmos</h1>
-    <div class=".div2">
-    <input type="text" placeholder="ask cosmos" id="user">
 
-    <button id="send" onclick="askbot()">send to cosmos</button>
+<body>
+
+    <div class="div">
+
+        <h1>hi i am cosmos</h1>
+
+        <div id="answer"></div>
+
+        <div class="bottom">
+
+            <input
+                type="text"
+                placeholder="ask cosmos"
+                id="user"
+            >
+
+            <button
+                id="send"
+                onclick="askbot()"
+            >
+                send to cosmos
+            </button>
+
+        </div>
+
     </div>
-    <div id="answer"></div>
-    </div>
+
+
     <script>
 
         const behaviour =
             "You are an AI coding assistant who helps people with programming, debugging, and understanding code. Give clear and useful answers in short sentences so users do not get overwhelmed or bored. Keep explanations simple and direct. When giving code, provide only what is needed and briefly explain how it works. If the user makes a mistake, politely point it out and show the correct solution. Ask a short question if you need more information.";
 
+
         async function askbot() {
 
-            const question = document.getElementById("user").value;
+            const question =
+                document.getElementById("user").value;
 
-            const answer = document.getElementById("answer");
+            const answer =
+                document.getElementById("answer");
+
 
             if (!question.trim()) {
-                answer.innerHTML = "Please ask me something!";
+
+                answer.innerHTML =
+                    "Please ask me something!";
+
                 return;
             }
 
-            answer.innerHTML = "Cosmos thinking....";
+
+            answer.innerHTML =
+                "Cosmos thinking....";
+
 
             try {
 
@@ -144,32 +181,50 @@
                         },
 
                         body: JSON.stringify({
+
                             question:
                                 behaviour +
                                 "\n\nUser: " +
                                 question
+
                         })
                     }
                 );
 
-                const data = await response.json();
 
-                console.log("Worker response:", data);
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "Worker response:",
+                    data
+                );
+
 
                 if (!response.ok) {
+
                     answer.innerHTML =
                         "Error: " +
-                        (data.error || "Unknown error");
+                        (data.error ||
+                        "Unknown error");
+
                     return;
                 }
+
 
                 if (!data.answer) {
+
                     answer.innerHTML =
                         "Cosmos didn't return an answer.";
+
                     return;
                 }
 
-                answer.innerHTML = data.answer;
+
+                answer.innerHTML =
+                    data.answer;
+
 
             } catch (error) {
 
@@ -179,9 +234,11 @@
                     "Connection error: " +
                     error.message;
             }
+
         }
 
     </script>
 
 </body>
+
 </html>
