@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmos AI Chat</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: #0b1020;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .chat-container {
+            background-color: #161f38;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        #answer {
+            margin-top: 20px;
+            text-align: left;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <h1>Hi, I am Cosmos</h1>
+        <input type="text" placeholder="Ask Cosmos..." id="user" onkeydown="if(event.key === 'Enter') askbot()">
+        <button id="send" onclick="askbot()">Send to Cosmos</button>
+        <div id="answer"></div>
+    </div>
+
+    <script>
+        // Array to hold the full chat session context
+        let conversationHistory = [];
+
+        const behaviour = "You are an AI coding assistant who helps people with programming, debugging, and understanding code. Give clear and useful answers in short sentences so users do not get overwhelmed or bored. Keep explanations simple and direct. When giving code, provide only what is needed and briefly explain how it works. If the user makes a mistake, politely point it out and show the correct solution. Ask a short question if you need more information.";
+
+        async function askbot() {
+            const userField = document.getElementById("user");
+            const question = userField.value.trim();
+            
+            // Do nothing if input field is completely empty
+            if (!question) return; 
+            
+            const answerDiv = document.getElementById("answer");
+            answerDiv.innerHTML = "<em>Cosmos thinking....</em>";
+            
+            // Step 1: Save the user's latest query to the history array
+            conversationHistory.push({ role: "user", parts: [{ text: question }] });
+            
+            // Step 2: Combine system constraints with conversation log for payload mapping
+            const payloadContents = [
+                { role: "user", parts: [{ text: behaviour }] },
+                ...conversationHistory
+            ];
+
+            try {
+                const response = await fetch(
+                    "https://workers.dev",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ contents: payloadContents })
+                    }
+                );
+                
+                const data = await response.json();
+                console.log("Worker response data:", data);
+                
+                // Step 3: Extract textual data cleanly from API block structure
+                const botResponse = data.candidates[0].content.parts[0].text;
+                
+                // Step 4: Save model output text into session storage so state carries over
+                conversationHistory.push({ role: "model", parts: [{ text: botResponse }] });
+                
+                // Step 5: Render content UI changes
+                answerDiv.innerText = botResponse;
+                userField.value = ""; 
+                
+            } catch (error) {
+                console.error("Fetch implementation failure:", error);
+                answerDiv.innerHTML = "<span style='color: #ef4444;'>Error connecting to Cosmos. Please try again.</span>";
+            }
+        }
+    </script>
+</body>
+</html>
