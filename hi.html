@@ -1,35 +1,117 @@
-    try {
-        const response = await fetch(
-            "https://delicate-paper-7065.jibranjaan78600.workers.dev",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question: behaviour + "\n\nUser Question: " + question })
-            }
-        );
-        
-        const data = await response.json();
-        console.log("Worker response data:", data);
-        
-        if (data.error) {
-            throw new Error(data.error);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmos AI Chat</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: #0b1020;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        
-        // Safely extract the answer text from whatever structure comes back
-        const botResponse = data.answer || data.text || (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text);
-        
-        if (!botResponse) {
-            throw new Error("No readable text found in the response object.");
+        .chat-container {
+            background-color: #161f38;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
         }
+        input {
+            width: 80%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            color: #000;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        #answer {
+            margin-top: 20px;
+            text-align: left;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
 
-        // Save model output text into session storage
-        conversationHistory.push({ role: "model", text: botResponse });
-        
-        // Render content UI changes
-        answerDiv.innerText = botResponse;
-        userField.value = ""; 
-        
-    } catch (error) {
-        console.error("Fetch implementation failure:", error);
-        answerDiv.innerHTML = "<span style='color: #ef4444;'>Error connecting to Cosmos. Please try again.</span>";
-    }
+    <div class="chat-container">
+        <h1>Hi, I am Cosmos</h1>
+        <input type="text" placeholder="Ask Cosmos..." id="user" onkeydown="if(event.key === 'Enter') askbot()">
+        <button id="send" onclick="askbot()">Send to Cosmos</button>
+        <div id="answer"></div>
+    </div>
+
+    <script>
+        let conversationHistory = [];
+
+        const behaviour = "You are an AI coding assistant who helps people with programming, debugging, and understanding code. Give clear and useful answers in short sentences so users do not get overwhelmed or bored. Keep explanations simple and direct. When giving code, provide only what is needed and briefly explain how it works. If the user makes a mistake, politely point it out and show the correct solution. Ask a short question if you need more information.";
+
+        async function askbot() {
+            const userField = document.getElementById("user");
+            const question = userField.value.trim();
+            
+            if (!question) return; 
+            
+            const answerDiv = document.getElementById("answer");
+            answerDiv.innerHTML = "<em>Cosmos thinking....</em>";
+            
+            conversationHistory.push({ role: "user", text: question });
+
+            try {
+                const response = await fetch(
+                    "https://workers.dev",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ question: behaviour + "\n\nUser Question: " + question })
+                    }
+                );
+                
+                const data = await response.json();
+                console.log("Worker response data:", data);
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                const botResponse = data.answer || data.text;
+                
+                if (!botResponse) {
+                    throw new Error("No readable text found in the response object.");
+                }
+
+                conversationHistory.push({ role: "model", text: botResponse });
+                
+                answerDiv.innerText = botResponse;
+                userField.value = ""; 
+                
+            } catch (error) {
+                console.error("Fetch implementation failure:", error);
+                answerDiv.innerHTML = "<span style='color: #ef4444;'>Error connecting to Cosmos. Please try again.</span>";
+            }
+        }
+    </script>
+</body>
+</html>
+
