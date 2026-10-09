@@ -18,8 +18,8 @@ async function askbot() {
 
     try {
         const response = await fetch(
-            // 🚨 UPDATED WITH YOUR LIVE WORKER URL FROM THE SCREENSHOT
-            "https://workers.dev",
+            // ✅ CORRECTED: This now points directly to your unique Cloudflare deployment
+            "https://delicate-paper-7065.jibranjaan78600.workers.dev",
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -46,3 +46,4 @@ async function askbot() {
         answerDiv.innerHTML = "<span style='color: #ef4444;'>Error connecting to Cosmos. Please try again.</span>";
     }
 }
+
