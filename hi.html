@@ -1,24 +1,5 @@
-// Array to hold the full chat session context
-let conversationHistory = [];
-
-// Base system constraints
-const behaviour = "You are an AI coding assistant who helps people with programming, debugging, and understanding code. Give clear and useful answers in short sentences so users do not get overwhelmed or bored. Keep explanations simple and direct. When giving code, provide only what is needed and briefly explain how it works. If the user makes a mistake, politely point it out and show the correct solution. Ask a short question if you need more information.";
-
-async function askbot() {
-    const userField = document.getElementById("user");
-    const question = userField.value.trim();
-    
-    // Do nothing if input field is completely empty
-    if (!question) return; 
-    
-    const answerDiv = document.getElementById("answer");
-    answerDiv.innerHTML = "<em>Cosmos thinking....</em>";
-    
-    conversationHistory.push({ role: "user", text: question });
-
     try {
         const response = await fetch(
-            // ✅ CORRECTED: This now points directly to your unique Cloudflare deployment
             "https://delicate-paper-7065.jibranjaan78600.workers.dev",
             {
                 method: "POST",
@@ -34,10 +15,17 @@ async function askbot() {
             throw new Error(data.error);
         }
         
-        const botResponse = data.answer;
+        // Safely extract the answer text from whatever structure comes back
+        const botResponse = data.answer || data.text || (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text);
         
+        if (!botResponse) {
+            throw new Error("No readable text found in the response object.");
+        }
+
+        // Save model output text into session storage
         conversationHistory.push({ role: "model", text: botResponse });
         
+        // Render content UI changes
         answerDiv.innerText = botResponse;
         userField.value = ""; 
         
@@ -45,5 +33,3 @@ async function askbot() {
         console.error("Fetch implementation failure:", error);
         answerDiv.innerHTML = "<span style='color: #ef4444;'>Error connecting to Cosmos. Please try again.</span>";
     }
-}
-
