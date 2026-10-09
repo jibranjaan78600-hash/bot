@@ -14,17 +14,15 @@ async function askbot() {
     const answerDiv = document.getElementById("answer");
     answerDiv.innerHTML = "<em>Cosmos thinking....</em>";
     
-    // 1. Maintain conversation history locally if you want (Optional)
     conversationHistory.push({ role: "user", text: question });
 
     try {
         const response = await fetch(
-            // 🚨 REPLACE THIS URL WITH YOUR ACTUAL CLOUDFLARE WORKER ROUTE URL
-            "https://your-worker-name.your-subdomain.workers.dev",
+            // 🚨 UPDATED WITH YOUR LIVE WORKER URL FROM THE SCREENSHOT
+            "https://workers.dev",
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                // 🚨 Fixed: Sends "question" as a string exactly how your Worker expects it
                 body: JSON.stringify({ question: behaviour + "\n\nUser Question: " + question })
             }
         );
@@ -36,13 +34,10 @@ async function askbot() {
             throw new Error(data.error);
         }
         
-        // 🚨 Fixed: Your Worker already wraps the text in data.answer
         const botResponse = data.answer;
         
-        // Save model output text into session storage
         conversationHistory.push({ role: "model", text: botResponse });
         
-        // Render content UI changes
         answerDiv.innerText = botResponse;
         userField.value = ""; 
         
